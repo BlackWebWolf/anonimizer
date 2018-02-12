@@ -1,0 +1,27 @@
+---
+- hosts: dev
+  tasks:
+    - ec2_instance_facts:
+        filters:
+          "tag:Cluster": admin-dev
+      delegate_to: localhost
+      register: ec2
+    - debug:
+        msg: "{{ ec2.instances[0]['private_ip_address'] }}"
+    - add_host:
+        hostname: "{{ ec2.instances[0]['private_ip_address'] }}"
+        ansible_ssh_host: "{{ ec2.instances[0]['private_ip_address'] }}"
+        ansible_ssh_user: ec2-user
+        ansible_ssh_private_key_file: {{ssh_keyfile}}
+        groups: gatewayed
+- hosts: gatewayed
+
+  tasks:
+    - name: Execute the command in remote shell; stdout goes to the specified file on the remote.
+      shell: docker ps --filter "name={{name}}" -q
+      register: container_id
+    - name: Execute the command in remote shell; stdout goes to the specified file on the remote.
+      shell: docker exec {{container_id.stdout}} bash -l -c "{{ docker_command }}"
+      register: files
+    - debug:
+        msg: "{{ files.stdout }}"

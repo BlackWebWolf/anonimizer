@@ -1,0 +1,28 @@
+---
+- hosts: dev
+  tasks:
+    - name: Include vars.
+      include_vars:
+        file: vars.yml
+    - apt:
+        name: python-pip
+    - pip:
+        name: psycopg2
+    - postgresql_db:
+        name: "{{ db_name }}"
+        login_host: "{{ postgres_db_host }}"
+        login_password: "{{ postgres_db_password }}"
+        login_user: "{{ postgres_db_user }}"
+        state: absent
+    - postgresql_db:
+        name: "{{ db_name }}"
+        login_host: "{{ postgres_db_host }}"
+        login_password: "{{ postgres_db_password }}"
+        login_user: "{{ postgres_db_user }}"
+        state: present
+    - postgresql_db:
+        name: "{{ db_name }}"
+        login_host: "{{ postgres_db_host }}"
+        login_password: "{{ postgres_db_password }}"
+        login_user: "{{ postgres_db_user }}"
+        state: restore

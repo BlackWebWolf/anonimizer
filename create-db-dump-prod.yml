@@ -1,0 +1,26 @@
+---
+- hosts: hosts: "{{ variable_host | default('dev') }}"
+  tasks:
+    - name: Include vars of stuff.yml into the 'stuff' variable (2.2).
+      include_vars:
+        file: vars.yml
+    - package:
+        name: python-pip
+        state: present
+        become: true
+    - pip:
+        name: psycopg2
+        become: true
+    - postgresql_db:
+        name: "{{ db_name }}"
+        login_host: "{{ postgres_db_host }}"
+        login_password: "{{ postgres_db_password }}"
+        login_user: "{{ postgres_db_user }}"
+        state: dump
+        target: "{{ backup_target }}"
+    - name: get compressed database
+      fetch:
+        mode: pull
+        src: "{{ backup_target }}"
+        dest: "{{ db_destination }}"
+        flat: yes

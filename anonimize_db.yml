@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Create a data container
+      shell: docker run -d -v "$(pwd)":/data -e POSTGRES_USER={{db_user}} -e POSTGRES_DB={{db_name}} -e POSTGRES_PASSWORD={{db_pass}} --name postgres anonimizer
+    - name: Load dump
+      shell: docker exec postgres bash -l -c "su - postgres -c 'psql {{container_name}} < /data/{{ sql_dump_name }}"
+    - name: anonimize
+      shell: docker exec postgres bash -l -c "python /data/anonimize.py"
+    - name: create dump back
+      shell: docker exec postgres bash -l -c "pg_dump -U {{db_user}} {{db_name}} >/data/{{ sql_anonimized_name }}"
